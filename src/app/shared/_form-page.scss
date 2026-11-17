@@ -1,0 +1,32 @@
+
+.form-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+.entity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  > mat-form-field {
+    flex: 1 1 12rem;
+  }
+}
