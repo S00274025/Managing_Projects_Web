@@ -1,0 +1,80 @@
+@use '@angular/material' as mat;
+
+.task {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-surface-container-low);
+}
+
+.task.done .title {
+  text-decoration: line-through;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.main {
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 0.25rem;
+  font: var(--mat-sys-title-medium);
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 0.5rem 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.overdue {
+  color: var(--mat-sys-error);
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+// Colours for chips. chips-overrides is the supported Material 3 way to change
+// component tokens. The text uses the matching "on-" colour so contrast stays readable.
+.status-done {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--mat-sys-tertiary-container),
+    label-text-color: var(--mat-sys-on-tertiary-container),
+  ));
+}
+.status-in_progress {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--mat-sys-primary-container),
+    label-text-color: var(--mat-sys-on-primary-container),
+  ));
+}
+.priority-high {
+  @include mat.chips-overrides((
+    elevated-container-color: var(--mat-sys-error-container),
+    label-text-color: var(--mat-sys-on-error-container),
+  ));
+}
+
+// On a phone the buttons go underneath the text
+@media (max-width: 599px) {
+  .task {
+    flex-direction: column;
+  }
+  .actions {
+    align-self: flex-end;
+  }
+}

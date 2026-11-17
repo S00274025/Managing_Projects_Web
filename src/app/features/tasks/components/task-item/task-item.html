@@ -1,0 +1,46 @@
+<article class="task" [class.done]="task().status === 'done'" [attr.aria-busy]="busy()">
+  <div class="main">
+    <h3 class="title">{{ task().title }}</h3>
+    @if (task().description) {
+      <p class="description">{{ task().description }}</p>
+    }
+    <mat-chip-set aria-label="Task details">
+      <mat-chip [class]="'status-' + task().status" disableRipple>{{ statusLabel() }}</mat-chip>
+      <mat-chip [class]="'priority-' + task().priority" disableRipple>Priority: {{ priorityLabel() }}</mat-chip>
+      @if (showProject() && task().project) {
+        <mat-chip disableRipple>
+          <a [routerLink]="['/projects', task().project._id]">{{ task().project.name }}</a>
+        </mat-chip>
+      }
+    </mat-chip-set>
+    <p class="meta">
+      Assigned to: {{ task().assignedTo?.name ?? 'Nobody' }}
+      @if (task().dueDate) {
+        · <span [class.overdue]="overdue()">Due {{ task().dueDate | date: 'mediumDate' }}{{ overdue() ? ' (overdue)' : '' }}</span>
+      }
+    </p>
+  </div>
+
+  <div class="actions">
+    <button matIconButton [matMenuTriggerFor]="statusMenu" [disabled]="busy()"
+            matTooltip="Change status" [attr.aria-label]="'Change status of ' + task().title">
+      <mat-icon>published_with_changes</mat-icon>
+    </button>
+    <mat-menu #statusMenu="matMenu">
+      @for (s of statuses; track s.value) {
+        <button mat-menu-item [disabled]="s.value === task().status" (click)="statusChange.emit(s.value)">
+          {{ s.label }}
+        </button>
+      }
+    </mat-menu>
+
+    <a matIconButton [routerLink]="['/tasks', task()._id, 'edit']" matTooltip="Edit"
+       [attr.aria-label]="'Edit ' + task().title">
+      <mat-icon>edit</mat-icon>
+    </a>
+    <button matIconButton (click)="remove.emit(task())" [disabled]="busy()" matTooltip="Delete"
+            [attr.aria-label]="'Delete ' + task().title">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+</article>

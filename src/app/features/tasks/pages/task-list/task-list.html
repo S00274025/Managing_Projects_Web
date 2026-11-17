@@ -1,0 +1,42 @@
+<section class="page">
+  <header class="page-header">
+    <h1>All tasks</h1>
+  </header>
+
+  <mat-button-toggle-group
+    class="filters"
+    aria-label="Filter tasks by status"
+    [value]="filter().status"
+    (change)="setStatusFilter($event.value)">
+    <mat-button-toggle value="all">All</mat-button-toggle>
+    @for (s of statuses; track s.value) {
+      <mat-button-toggle [value]="s.value">{{ s.label }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+
+  @if (actionError(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  @let s = state();
+  @if (s.status === 'loading') {
+    <div class="center" role="status">
+      <mat-spinner diameter="40" aria-label="Loading tasks" />
+    </div>
+  } @else if (s.status === 'error') {
+    <p class="error" role="alert">{{ s.message }}</p>
+  } @else if (s.data.length === 0) {
+    <p>No tasks found. Open a project to add tasks.</p>
+  } @else {
+    <div class="task-list">
+      @for (task of s.data; track task._id) {
+        <app-task-item
+          [task]="task"
+          [showProject]="true"
+          [busy]="busyTaskId() === task._id"
+          (statusChange)="changeStatus(task, $event)"
+          (remove)="deleteTask($event)" />
+      }
+    </div>
+  }
+</section>

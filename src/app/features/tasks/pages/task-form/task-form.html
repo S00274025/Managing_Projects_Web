@@ -1,0 +1,109 @@
+<section class="page">
+  <mat-card appearance="outlined" class="form-card">
+    @if (saving()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <mat-card-header>
+      <mat-card-title><h1>{{ id() ? 'Edit task' : 'New task' }}</h1></mat-card-title>
+      @if (projectName(); as name) {
+        <mat-card-subtitle>Project: {{ name }}</mat-card-subtitle>
+      }
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loadError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="entity-form" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" placeholder="e.g. Design the home page" />
+          @if (taskForm.controls.title.hasError('required')) {
+            <mat-error>Title is required</mat-error>
+          } @else if (taskForm.controls.title.hasError('blank')) {
+            <mat-error>Title cannot be only spaces</mat-error>
+          } @else if (taskForm.controls.title.hasError('maxlength')) {
+            <mat-error>Title must be {{ titleMax }} characters or fewer</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="4"></textarea>
+          <mat-hint>Optional</mat-hint>
+          <mat-hint align="end">{{ taskForm.controls.description.value.length }} / {{ descriptionMax }}</mat-hint>
+          <mat-error>Description must be {{ descriptionMax }} characters or fewer</mat-error>
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              @for (s of statuses; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority">
+              @for (p of priorities; track p.value) {
+                <mat-option [value]="p.value">{{ p.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @let u = users();
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Assigned to</mat-label>
+            <mat-select formControlName="assignedTo">
+              <mat-option [value]="null">Nobody</mat-option>
+              @if (u.status === 'loaded') {
+                @for (user of u.data; track user._id) {
+                  <mat-option [value]="user._id">{{ user.name }} ({{ user.email }})</mat-option>
+                }
+              }
+            </mat-select>
+            @if (u.status === 'loading') {
+              <mat-hint>Loading users...</mat-hint>
+            } @else if (u.status === 'error') {
+              <mat-hint class="error">Could not load users</mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Due date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dueDate" [min]="minDate()" />
+            <mat-hint>Optional - pick a date from the calendar</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+            @if (taskForm.controls.dueDate.hasError('matDatepickerParse')) {
+              <mat-error>That is not a valid date</mat-error>
+            } @else if (taskForm.controls.dueDate.hasError('matDatepickerMin')) {
+              <mat-error>Due date cannot be in the past</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (saveError(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+
+        <div class="button-group">
+          <button matButton="filled" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving...' : 'Save task' }}
+          </button>
+          @if (ownerProjectId(); as pid) {
+            <a matButton [routerLink]="['/projects', pid]">Cancel</a>
+          } @else {
+            <a matButton routerLink="/tasks">Cancel</a>
+          }
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>
