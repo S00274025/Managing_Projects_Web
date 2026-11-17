@@ -1,0 +1,38 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Projects</h1>
+    <a matButton="filled" routerLink="/projects/new">
+      <mat-icon>add</mat-icon>
+      New project
+    </a>
+  </header>
+
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>Search projects by name</mat-label>
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    <input matInput type="search" [value]="search()" (input)="onSearch($event)" />
+  </mat-form-field>
+
+  @let s = state();
+  @if (s.status === 'loading') {
+    <div class="center" role="status">
+      <mat-spinner diameter="40" aria-label="Loading projects" />
+    </div>
+  } @else if (s.status === 'error') {
+    <p class="error" role="alert">{{ s.message }}</p>
+  } @else if (s.data.length === 0) {
+    <p>
+      @if (search()) {
+        No projects match "{{ search() }}".
+      } @else {
+        You have no projects yet. Create one to get started.
+      }
+    </p>
+  } @else {
+    <div class="grid">
+      @for (project of s.data; track project._id) {
+        <app-project-card [project]="project" />
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,31 @@
+.back {
+  margin-bottom: 0.5rem;
+}
+
+.meta {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.description {
+  white-space: pre-line;
+  max-width: 60ch;
+}
+
+.tasks {
+  margin-top: 2rem;
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  max-width: 28rem;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}

@@ -1,0 +1,81 @@
+<section class="page">
+  <a matButton routerLink="/projects" class="back">
+    <mat-icon>arrow_back</mat-icon>
+    All projects
+  </a>
+
+  @let s = state();
+  @if (s.status === 'loading') {
+    <div class="center" role="status">
+      <mat-spinner diameter="40" aria-label="Loading project" />
+    </div>
+  } @else if (s.status === 'error') {
+    <p class="error" role="alert">{{ s.message }}</p>
+  } @else {
+    @let project = s.data;
+    <header class="page-header">
+      <div>
+        <h1>{{ project.name }}</h1>
+        <p class="meta">
+          Owner: {{ project.owner?.name ?? 'Unknown' }} · Created {{ project.createdAt | date: 'mediumDate' }}
+        </p>
+      </div>
+      <div class="button-group">
+        <a matButton="filled" [routerLink]="['/projects', project._id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </a>
+        <button matButton="outlined" (click)="deleteProject(project)" [disabled]="deleting()">
+          <mat-icon>delete</mat-icon>
+          {{ deleting() ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </header>
+
+    @if (deleteError(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <p class="description">{{ project.description || 'No description.' }}</p>
+
+    <section class="tasks" aria-labelledby="tasks-heading">
+      <header class="page-header">
+        <h2 id="tasks-heading">Tasks</h2>
+        <a matButton="tonal" [routerLink]="['/projects', project._id, 'tasks', 'new']">
+          <mat-icon>add_task</mat-icon>
+          Add task
+        </a>
+      </header>
+
+      @if (progress(); as p) {
+        <div class="progress">
+          <span id="progress-label">{{ p.done }} of {{ p.total }} tasks done ({{ p.percent }}%)</span>
+          <mat-progress-bar mode="determinate" [value]="p.percent" aria-labelledby="progress-label" />
+        </div>
+      }
+
+      @if (taskError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      @let t = tasksState();
+      @if (t.status === 'loading') {
+        <p role="status">Loading tasks...</p>
+      } @else if (t.status === 'error') {
+        <p class="error" role="alert">{{ t.message }}</p>
+      } @else if (t.data.length === 0) {
+        <p>This project has no tasks yet.</p>
+      } @else {
+        <div class="task-list">
+          @for (task of t.data; track task._id) {
+            <app-task-item
+              [task]="task"
+              [busy]="busyTaskId() === task._id"
+              (statusChange)="changeStatus(task, $event)"
+              (remove)="deleteTask($event)" />
+          }
+        </div>
+      }
+    </section>
+  }
+</section>

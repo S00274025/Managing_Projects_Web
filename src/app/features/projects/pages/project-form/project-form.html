@@ -1,0 +1,52 @@
+<section class="page">
+  <mat-card appearance="outlined" class="form-card">
+    @if (saving()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <mat-card-header>
+      <mat-card-title><h1>{{ id() ? 'Edit project' : 'New project' }}</h1></mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loadError(); as message) {
+        <p class="error" role="alert">Could not load the project: {{ message }}</p>
+      }
+
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="entity-form" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>Project name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. College website" />
+          <mat-hint align="end">{{ projectForm.controls.name.value.length }} / {{ nameMax }}</mat-hint>
+          @if (projectForm.controls.name.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          } @else if (projectForm.controls.name.hasError('blank')) {
+            <mat-error>Name cannot be only spaces</mat-error>
+          } @else if (projectForm.controls.name.hasError('minlength')) {
+            <mat-error>Name must be at least 2 characters</mat-error>
+          } @else if (projectForm.controls.name.hasError('maxlength')) {
+            <mat-error>Name must be {{ nameMax }} characters or fewer</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="5"></textarea>
+          <mat-hint>Optional</mat-hint>
+          <mat-hint align="end">{{ projectForm.controls.description.value.length }} / {{ descriptionMax }}</mat-hint>
+          <mat-error>Description must be {{ descriptionMax }} characters or fewer</mat-error>
+        </mat-form-field>
+
+        @if (saveError(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+
+        <div class="button-group">
+          <button matButton="filled" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving...' : 'Save project' }}
+          </button>
+          <a matButton [routerLink]="cancelLink()">Cancel</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>
