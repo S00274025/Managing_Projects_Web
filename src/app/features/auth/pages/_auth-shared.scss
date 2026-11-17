@@ -1,0 +1,38 @@
+// Shared styles for the login and register pages
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 26rem;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-small);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-card-actions {
+  gap: 0.25rem;
+  padding-left: 1rem;
+}
+
+.error {
+  color: var(--mat-sys-error);
+  margin: 0;
+}
