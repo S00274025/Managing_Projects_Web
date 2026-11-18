@@ -1,0 +1,37 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<mat-toolbar class="toolbar">
+  <a class="brand" routerLink="/projects">
+    <mat-icon aria-hidden="true">dashboard</mat-icon>
+    <span>Managing Projects</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  @if (auth.isLoggedIn()) {
+    @if (isHandset()) {
+      <button matIconButton [matMenuTriggerFor]="navMenu" aria-label="Open navigation menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <mat-menu #navMenu="matMenu">
+        <a mat-menu-item routerLink="/projects"><mat-icon>folder</mat-icon>Projects</a>
+        <a mat-menu-item routerLink="/tasks"><mat-icon>checklist</mat-icon>All tasks</a>
+        <button mat-menu-item (click)="auth.logout()"><mat-icon>logout</mat-icon>Log out</button>
+      </mat-menu>
+    } @else {
+      <nav aria-label="Main" class="nav">
+        <a matButton routerLink="/projects" routerLinkActive="active" ariaCurrentWhenActive="page">Projects</a>
+        <a matButton routerLink="/tasks" routerLinkActive="active" ariaCurrentWhenActive="page">All tasks</a>
+      </nav>
+      <span class="user-name">{{ auth.user()?.name }}</span>
+      <button matButton (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        Log out
+      </button>
+    }
+  }
+</mat-toolbar>
+
+<main id="main-content" tabindex="-1">
+  <router-outlet />
+</main>
