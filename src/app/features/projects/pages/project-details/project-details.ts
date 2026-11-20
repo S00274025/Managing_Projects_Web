@@ -16,6 +16,7 @@ import { Task, TaskStatus } from '../../../tasks/models/task.model';
 import { LoadState, withLoadState } from '../../../../shared/load-state';
 import { TaskItem } from '../../../tasks/components/task-item/task-item';
 import { ConfirmDialog, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-project-details',
@@ -33,10 +34,8 @@ export class ProjectDetails {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  // From the route parameter :id (withComponentInputBinding)
   readonly id = input.required<string>();
 
-  // Changing this number makes the task list load again (after a delete or status change)
   private readonly refreshTasks = signal(0);
 
   readonly deleting = signal(false);
@@ -47,7 +46,6 @@ export class ProjectDetails {
   readonly initialProject: LoadState<Project> = { status: 'loading' };
   readonly initialTasks: LoadState<Task[]> = { status: 'loading' };
 
-  // Same pattern as car-details in WS3
   state = toSignal(
     toObservable(this.id).pipe(
       switchMap((id) => withLoadState(this.projectService.getProjectById(id))),
@@ -55,8 +53,6 @@ export class ProjectDetails {
     { initialValue: this.initialProject },
   );
 
-  // Tasks for this project use the ?project= filter on the API.
-  // computed() combines the id and the refresh counter, so either change reloads the tasks.
   private readonly taskQuery = computed(() => ({ project: this.id(), refresh: this.refreshTasks() }));
 
   tasksState = toSignal(
@@ -67,7 +63,13 @@ export class ProjectDetails {
     { initialValue: this.initialTasks },
   );
 
-  // Small summary for the header: how many tasks are done
+  private auth = inject(AuthService);
+
+  readonly isOwner = computed(() => {
+    const s = this.state();
+    return s.status === 'loaded' && s.data.owner?._id === this.auth.user()?.id;
+  });
+
   readonly progress = computed(() => {
     const t = this.tasksState();
     if (t.status !== 'loaded' || t.data.length === 0) return null;
@@ -103,7 +105,6 @@ export class ProjectDetails {
   changeStatus(task: Task, status: TaskStatus): void {
     this.busyTaskId.set(task._id);
     this.taskError.set(null);
-    // PATCH only sends the field that changed
     this.taskService.updateTask(task._id, { status }).subscribe({
       next: () => {
         this.busyTaskId.set(null);

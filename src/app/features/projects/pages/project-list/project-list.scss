@@ -3,7 +3,6 @@
   max-width: 28rem;
 }
 
-// Responsive grid: 1 column on a phone, more columns on bigger screens
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));

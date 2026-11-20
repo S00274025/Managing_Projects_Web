@@ -36,12 +36,31 @@
           <mat-error>Description must be {{ descriptionMax }} characters or fewer</mat-error>
         </mat-form-field>
 
+        @let u = users();
+        <mat-form-field appearance="outline">
+          <mat-label>Members</mat-label>
+          <mat-select formControlName="members" multiple>
+            @if (u.status === 'loaded') {
+              @for (user of u.data; track user._id) {
+                <mat-option [value]="user._id">{{ user.name }} ({{ user.email }})</mat-option>
+              }
+            }
+          </mat-select>
+          @if (u.status === 'loading') {
+            <mat-hint>Loading users...</mat-hint>
+          } @else if (u.status === 'error') {
+            <mat-hint class="error">Could not load users</mat-hint>
+          } @else {
+            <mat-hint>Only you and the members can see this project</mat-hint>
+          }
+        </mat-form-field>
+
         @if (saveError(); as message) {
           <p class="error" role="alert">{{ message }}</p>
         }
 
         <div class="button-group">
-          <button matButton="filled" type="submit" [disabled]="saving()">
+          <button matButton="filled" type="submit" [disabled]="saving() || notOwner()">
             {{ saving() ? 'Saving...' : 'Save project' }}
           </button>
           <a matButton [routerLink]="cancelLink()">Cancel</a>

@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Project } from '../../models/project.model';
 
-// Presentational component: it only displays the project it is given (like car-card in WS2)
 @Component({
   selector: 'app-project-card',
   imports: [RouterLink, DatePipe, MatCardModule, MatButtonModule, MatIconModule],

@@ -19,17 +19,27 @@
         <p class="meta">
           Owner: {{ project.owner?.name ?? 'Unknown' }} · Created {{ project.createdAt | date: 'mediumDate' }}
         </p>
+        <p class="meta">
+          Members:
+          @for (member of project.members; track member._id; let last = $last) {
+            {{ member.name }}{{ last ? '' : ', ' }}
+          } @empty {
+            none yet
+          }
+        </p>
       </div>
-      <div class="button-group">
-        <a matButton="filled" [routerLink]="['/projects', project._id, 'edit']">
-          <mat-icon>edit</mat-icon>
-          Edit
-        </a>
-        <button matButton="outlined" (click)="deleteProject(project)" [disabled]="deleting()">
-          <mat-icon>delete</mat-icon>
-          {{ deleting() ? 'Deleting...' : 'Delete' }}
-        </button>
-      </div>
+      @if (isOwner()) {
+        <div class="button-group">
+          <a matButton="filled" [routerLink]="['/projects', project._id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </a>
+          <button matButton="outlined" (click)="deleteProject(project)" [disabled]="deleting()">
+            <mat-icon>delete</mat-icon>
+            {{ deleting() ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      }
     </header>
 
     @if (deleteError(); as message) {

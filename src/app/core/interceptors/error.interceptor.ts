@@ -3,7 +3,6 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 
-
 function serverMessage(error: HttpErrorResponse): string | null {
   const body: unknown = error.error;
   if (body && typeof body === 'object' && 'message' in body && typeof body.message === 'string') {
@@ -11,7 +10,6 @@ function serverMessage(error: HttpErrorResponse): string | null {
   }
   return null;
 }
-
 
 export function friendlyMessage(error: HttpErrorResponse): string {
   switch (error.status) {
@@ -22,7 +20,7 @@ export function friendlyMessage(error: HttpErrorResponse): string {
     case 401:
       return serverMessage(error) ?? 'Please log in to continue.';
     case 403:
-      return 'You are not allowed to do that.';
+      return serverMessage(error) ?? 'You are not allowed to do that.';
     case 404:
       return 'The item you asked for could not be found.';
     case 409:

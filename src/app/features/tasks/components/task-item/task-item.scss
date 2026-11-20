@@ -48,8 +48,6 @@
   flex-shrink: 0;
 }
 
-// Colours for chips. chips-overrides is the supported Material 3 way to change
-// component tokens. The text uses the matching "on-" colour so contrast stays readable.
 .status-done {
   @include mat.chips-overrides((
     elevated-container-color: var(--mat-sys-tertiary-container),
@@ -69,7 +67,6 @@
   ));
 }
 
-// On a phone the buttons go underneath the text
 @media (max-width: 599px) {
   .task {
     flex-direction: column;

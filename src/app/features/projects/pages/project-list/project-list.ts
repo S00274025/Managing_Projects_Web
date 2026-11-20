@@ -24,14 +24,10 @@ import { Project } from '../../models/project.model';
 export class ProjectList {
   private projectService = inject(ProjectService);
 
-  // What the user typed in the search box
   readonly search = signal('');
 
   readonly initial: LoadState<Project[]> = { status: 'loading' };
 
-  // Same idea as car-details in WS3: turn the signal into an observable and use switchMap.
-  // debounceTime waits until the user stops typing for 300ms so we don't send a request
-  // on every key press, and switchMap cancels the old request if a new search starts.
   state = toSignal(
     toObservable(this.search).pipe(
       debounceTime(300),

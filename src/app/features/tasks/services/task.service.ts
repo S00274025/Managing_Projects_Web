@@ -9,7 +9,6 @@ export class TaskService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/tasks`;
 
-  // Uses the ?project= and ?status= filters from part 1 of the API
   getTasks(filter: TaskFilter = {}): Observable<Task[]> {
     let params = new HttpParams();
     if (filter.project) params = params.set('project', filter.project);

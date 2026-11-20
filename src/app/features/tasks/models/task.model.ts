@@ -3,7 +3,6 @@ import { User } from '../../users/models/user.model';
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
 
-// Same values as the enums in the Mongoose Task model, with labels for the UI
 export const TASK_STATUSES: { value: TaskStatus; label: string }[] = [
   { value: 'todo', label: 'To do' },
   { value: 'in_progress', label: 'In progress' },
@@ -16,7 +15,6 @@ export const TASK_PRIORITIES: { value: TaskPriority; label: string }[] = [
   { value: 'high', label: 'High' },
 ];
 
-// What the API returns. project and assignedTo are populated.
 export interface Task {
   _id: string;
   title: string;
@@ -35,12 +33,11 @@ export interface CreateTaskDto {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  project: string; // project id
-  assignedTo?: string; // user id
-  dueDate?: string; // ISO date string
+  project: string;
+  assignedTo?: string;
+  dueDate?: string;
 }
 
-// PATCH body. null means "clear this field" (the API schema allows null for these)
 export interface UpdateTaskDto {
   title?: string;
   description?: string | null;
@@ -50,7 +47,6 @@ export interface UpdateTaskDto {
   dueDate?: string | null;
 }
 
-// Query parameters supported by GET /api/tasks
 export interface TaskFilter {
   project?: string;
   status?: TaskStatus;

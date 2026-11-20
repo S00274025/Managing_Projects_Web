@@ -13,7 +13,6 @@ import { ConfirmDialog, ConfirmDialogData } from '../../../../shared/components/
 
 type StatusFilter = TaskStatus | 'all';
 
-// All tasks across every project, filtered by status using GET /api/tasks?status=
 @Component({
   selector: 'app-task-list',
   imports: [TaskItem, MatButtonToggleModule, MatProgressSpinnerModule],
@@ -35,8 +34,6 @@ export class TaskList {
 
   readonly initial: LoadState<Task[]> = { status: 'loading' };
 
-  // filter is an object, so even choosing the same status again creates a new value
-  // and the list reloads - this is also used to refresh after a change.
   state = toSignal(
     toObservable(this.filter).pipe(
       switchMap(({ status }) =>

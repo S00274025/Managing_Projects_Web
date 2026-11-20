@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { User } from '../models/user.model';
 
-// Used to fill the "Assigned to" drop down on the task form
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private http = inject(HttpClient);

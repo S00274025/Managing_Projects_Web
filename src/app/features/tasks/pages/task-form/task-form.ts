@@ -1,5 +1,4 @@
 import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,16 +10,15 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TaskService } from '../../services/task.service';
-import { UserService } from '../../../users/services/user.service';
 import { ProjectService } from '../../../projects/services/project.service';
+import { Project, projectPeople } from '../../../projects/models/project.model';
+import { User } from '../../../users/models/user.model';
 import {
   CreateTaskDto, TASK_PRIORITIES, TASK_STATUSES, TaskPriority, TaskStatus, UpdateTaskDto,
 } from '../../models/task.model';
-import { withLoadState } from '../../../../shared/load-state';
+import { LoadState } from '../../../../shared/load-state';
 import { notBlank } from '../../../../shared/validators/not-blank.validator';
 
-// Add:  /projects/:projectId/tasks/new  -> projectId has a value
-// Edit: /tasks/:id/edit                 -> id has a value
 @Component({
   selector: 'app-task-form',
   imports: [
@@ -34,14 +32,12 @@ export class TaskForm implements OnInit {
   private formBuilder = inject(FormBuilder);
   private taskService = inject(TaskService);
   private projectService = inject(ProjectService);
-  private userService = inject(UserService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
 
   readonly id = input<string>();
   readonly projectId = input<string>();
 
-  // When editing we only know the project after the task has loaded
   private readonly loadedProjectId = signal<string | null>(null);
   readonly ownerProjectId = computed(() => this.projectId() ?? this.loadedProjectId());
   readonly projectName = signal<string | null>(null);
@@ -49,11 +45,8 @@ export class TaskForm implements OnInit {
   readonly statuses = TASK_STATUSES;
   readonly priorities = TASK_PRIORITIES;
 
-  // Users for the "Assigned to" drop down
-  readonly users = toSignal(withLoadState(this.userService.getUsers()), { requireSync: true });
+  readonly users = signal<LoadState<User[]>>({ status: 'loading' });
 
-  // New tasks cannot be due in the past. When editing an old task this is not enforced,
-  // otherwise an overdue task could never be saved again.
   readonly minDate = computed(() => (this.id() ? null : startOfToday()));
 
   saving = signal(false);
@@ -63,7 +56,6 @@ export class TaskForm implements OnInit {
   readonly titleMax = 200;
   readonly descriptionMax = 2000;
 
-  // Limits match createTaskSchema (Zod) on the server
   taskForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(this.titleMax), notBlank]],
     description: ['', Validators.maxLength(this.descriptionMax)],
@@ -80,6 +72,7 @@ export class TaskForm implements OnInit {
         next: (task) => {
           this.loadedProjectId.set(task.project?._id ?? null);
           this.projectName.set(task.project?.name ?? null);
+          if (task.project?._id) this.loadProject(task.project._id);
           this.taskForm.patchValue({
             title: task.title,
             description: task.description ?? '',
@@ -94,14 +87,21 @@ export class TaskForm implements OnInit {
       return;
     }
 
-    // Adding: show which project the task is being added to
     const projectId = this.projectId();
-    if (projectId) {
-      this.projectService.getProjectById(projectId).subscribe({
-        next: (project) => this.projectName.set(project.name),
-        error: (err: Error) => this.loadError.set(err.message),
-      });
-    }
+    if (projectId) this.loadProject(projectId);
+  }
+
+  private loadProject(projectId: string): void {
+    this.projectService.getProjectById(projectId).subscribe({
+      next: (project: Project) => {
+        this.projectName.set(project.name);
+        this.users.set({ status: 'loaded', data: projectPeople(project) });
+      },
+      error: (err: Error) => {
+        this.loadError.set(err.message);
+        this.users.set({ status: 'error', message: err.message });
+      },
+    });
   }
 
   onSubmit(): void {
@@ -118,7 +118,6 @@ export class TaskForm implements OnInit {
     const id = this.id();
     let request;
     if (id) {
-      // PATCH: null tells the API to clear assignedTo / dueDate
       const changes: UpdateTaskDto = {
         title: title.trim(),
         description: description.trim(),
@@ -162,8 +161,6 @@ function startOfToday(): Date {
   return d;
 }
 
-// The datepicker gives local midnight. Converting that straight to UTC can move it to
-// the day before (e.g. Irish summer time is UTC+1). Using midday UTC keeps the same date.
 function toIsoDate(date: Date): string {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12)).toISOString();
 }
